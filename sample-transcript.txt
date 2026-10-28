@@ -1,0 +1,12 @@
+[00:05] Asha: Okay, let's start. Ravi, the login bug from last week, is it fixed?
+[00:20] Ravi: Not yet, I'll push it to next Friday, the vendor API was down.
+[01:10] Meera: I'll send the revised pricing deck to the client by Wednesday.
+[02:00] Asha: We need to pick a payments provider. Stripe or Razorpay?
+[02:15] Ravi: Razorpay has better UPI support but Stripe has better docs.
+[02:40] Asha: Let's circle back on that. Also, someone needs to own the onboarding emails. Anyone?
+[02:50] Meera: Not sure... let's see later.
+
+
+
+
+
