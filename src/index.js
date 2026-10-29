@@ -70,20 +70,21 @@ app.get("/api/meetings/:id", wrap(async (req, res) => {
 
 // send or resend one email of a meeting
 app.post("/api/meetings/:id/emails/:idx/send", wrap(async (req, res) => {
+  const idx = Number(req.params.idx);
   const meeting = await Meeting.findOne({ _id: req.params.id, admin: req.user._id });
-  const e = meeting?.emails[Number(req.params.idx)];
+  const e = meeting?.emails[idx];
   if (!e) return res.status(404).json({ error: "Email not found" });
-  // look the addresses up again: contacts may have been added or fixed since
   const names = (e.names?.length ? e.names : [e.to]).flatMap(splitNames);
-  e.toEmails = await emailsFor(req.user._id, names);
-  const result = await sendEmail(e, req.user.email);
+  const toEmails = await emailsFor(req.user._id, names);
+  const result = await sendEmail({ toEmails, subject: e.subject, body: e.body }, req.user.email);
   if (result.status === "no_email")
     result.error = `No email address found for: ${names.join(", ")}. Add each person on the Team tab (the name must match).`;
-  e.set(result);
-  meeting.markModified("emails");
-  await meeting.save();
-  console.log(`[mail] "${e.subject}" -> ${e.toEmails.join(", ") || "nobody"}: ${result.status} ${result.error || ""}`);
-  res.json(meeting);
+  // update only this email's fields, so clicking several Send buttons can't collide
+  const set = { [`emails.${idx}.toEmails`]: toEmails };
+  for (const [k, v] of Object.entries(result)) set[`emails.${idx}.${k}`] = v;
+  await Meeting.updateOne({ _id: meeting._id }, { $set: set });
+  console.log(`[mail] "${e.subject}" -> ${toEmails.join(", ") || "nobody"}: ${result.status} ${result.error || ""}`);
+  res.json(await Meeting.findById(meeting._id));
 }));
 
 // ---- dashboard

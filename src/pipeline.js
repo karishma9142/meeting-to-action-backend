@@ -106,10 +106,15 @@ export async function runPipeline({ admin, title, date, attendees, audioPath, tr
 
   // 7. send automatically
   if (autoSend) {
-    for (const e of meeting.emails) {
-      if (e.toEmails.length) e.set(await sendEmail(e, admin.email));
+    for (let i = 0; i < meeting.emails.length; i++) {
+      const e = meeting.emails[i];
+      if (!e.toEmails.length) continue;
+      const result = await sendEmail(e, admin.email);
+      const set = {};
+      for (const [k, v] of Object.entries(result)) set[`emails.${i}.${k}`] = v;
+      await Meeting.updateOne({ _id: meeting._id }, { $set: set });
     }
-    await meeting.save();
+    return await Meeting.findById(meeting._id);
   }
   return meeting;
 }
