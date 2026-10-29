@@ -65,6 +65,7 @@ export async function sendEmail(email, replyTo) {
       });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(j.message || `Brevo error ${r.status}`);
+      console.log("[brevo] accepted", j.messageId);
       return { status: "sent", error: "", sentAt: new Date(), previewUrl: "" };
     } catch (e) {
       return { status: "failed", error: e.message };

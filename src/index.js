@@ -169,4 +169,5 @@ app.use((err, _req, res, _next) => {
 
 await mongoose.connect(process.env.MONGO_URI);
 startScheduler();
+console.log("[mail] mode:", mailMode());
 app.listen(process.env.PORT || 5000, () => console.log("API on :" + (process.env.PORT || 5000)));
